@@ -2,11 +2,12 @@
   "name": "ga",
   "version": "1.0.0",
   "description": "A toy programming language",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "prettier:check": "prettier --check \"./**/*.{js,ts,json}\"",
     "prettier:fix": "prettier --write \"./**/*.{js,ts,json}\"",
-    "ga": "node src/index.js"
+    "build": "tsc",
+    "exec": "node dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
   },
   "homepage": "https://github.com/x-incubator/ga#readme",
   "devDependencies": {
-    "prettier": "^3.7.4"
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   }
 }
