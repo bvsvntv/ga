@@ -2,6 +2,7 @@
   "name": "ga",
   "version": "1.0.0",
   "description": "A toy programming language",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "prettier:check": "prettier --check \"./**/*.{js,ts,json}\"",
