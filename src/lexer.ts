@@ -122,7 +122,7 @@ export class Lexer {
       this.startPosition,
       this.currentPosition
     );
-    this.tokens.push(new Token(kind, text));
+    this.tokens.push(new Token(kind, text, this.line));
   }
 
   /**

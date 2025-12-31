@@ -52,9 +52,11 @@ export const keywords: Record<string, TokenKind> = {
 export class Token {
   kind: TokenKind;
   lexeme: string;
+  line: number;
 
-  constructor(kind: TokenKind, lexeme: string) {
+  constructor(kind: TokenKind, lexeme: string, line: number) {
     this.kind = kind;
     this.lexeme = lexeme;
+    this.line = line;
   }
 }
