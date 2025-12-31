@@ -168,12 +168,12 @@ export class Lexer {
    */
   private readDevanagariDigit(): void {
     while (this.isDevanagariDigit(this.peekNextChar())) this.getNextChar();
-    const content = this.source.substring(
+    const literal = this.source.substring(
       this.startPosition,
       this.currentPosition
     );
 
-    this.createToken(TokenKind.Number, content);
+    this.createToken(TokenKind.Number, literal);
   }
 
   /**
@@ -181,13 +181,13 @@ export class Lexer {
    */
   private readDevanagariIdentifier(): void {
     while (this.isDevnagariChar(this.peekNextChar())) this.getNextChar();
-    const content = this.source.substring(
+    const literal = this.source.substring(
       this.startPosition,
       this.currentPosition
     );
 
-    const keywordKind = keywords[content];
-    if (keywordKind) this.createToken(keywordKind, content);
-    else this.createToken(TokenKind.Identifier, content);
+    const keywordKind = keywords[literal];
+    if (keywordKind) this.createToken(keywordKind, literal);
+    else this.createToken(TokenKind.Identifier, literal);
   }
 }
