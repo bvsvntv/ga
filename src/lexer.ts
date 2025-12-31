@@ -91,6 +91,9 @@ export class Lexer {
       case '\n':
         this.line++;
         break;
+      case '"':
+        this.readDevanagariString();
+        break;
       default:
         if (this.isDevnagariChar(char)) {
           if (this.isDevanagariDigit(char)) this.readDevanagariDigit();
@@ -189,5 +192,19 @@ export class Lexer {
     const keywordKind = keywords[literal];
     if (keywordKind) this.createToken(keywordKind, literal);
     else this.createToken(TokenKind.Identifier, literal);
+  }
+
+  private readDevanagariString(): void {
+    while (this.peekNextChar() != '"' && !this.isAtEnd()) {
+      if (this.peekNextChar() === '\n') this.line++;
+      this.getNextChar();
+    }
+
+    this.getNextChar();
+    const content = this.source.substring(
+      this.startPosition + 1,
+      this.currentPosition - 1
+    );
+    this.createToken(TokenKind.String, content);
   }
 }
