@@ -93,8 +93,8 @@ export class Lexer {
         break;
       default:
         if (this.isDevnagariChar(char)) {
-          if (this.isDevanagariDigit(char)) this.createToken(TokenKind.Number);
-          else this.isDevanagariIdentifier();
+          if (this.isDevanagariDigit(char)) this.readDevanagariDigit();
+          else this.readDevanagariIdentifier();
         }
         break;
     }
@@ -132,7 +132,7 @@ export class Lexer {
   /**
    * Peek next character
    */
-  private peek(): string {
+  private peekNextChar(): string {
     if (this.isAtEnd()) return '\0';
     return this.source.charAt(this.currentPosition);
   }
@@ -164,17 +164,30 @@ export class Lexer {
   }
 
   /**
-   * Check if the character sequence is devanagari identifier
+   * Read devanagari character sequence as number
    */
-  private isDevanagariIdentifier(): void {
-    while (this.isDevnagariChar(this.peek())) this.getNextChar();
+  private readDevanagariDigit(): void {
+    while (this.isDevanagariDigit(this.peekNextChar())) this.getNextChar();
+    const content = this.source.substring(
+      this.startPosition,
+      this.currentPosition
+    );
+
+    this.createToken(TokenKind.Number, content);
+  }
+
+  /**
+   * Read devanagari character sequence as identifier
+   */
+  private readDevanagariIdentifier(): void {
+    while (this.isDevnagariChar(this.peekNextChar())) this.getNextChar();
     const content = this.source.substring(
       this.startPosition,
       this.currentPosition
     );
 
     const keywordKind = keywords[content];
-    if (keywordKind) this.createToken(keywordKind);
-    else this.createToken(TokenKind.Identifier);
+    if (keywordKind) this.createToken(keywordKind, content);
+    else this.createToken(TokenKind.Identifier, content);
   }
 }
