@@ -17,10 +17,10 @@
 
     /* Transpiling */
     "module": "NodeNext",
-    "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
+    "outDir": "./dist",
     "sourceMap": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules","dist"]
+  "include": ["src/**/*.ts", "tests/**/*.test.ts"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -9,6 +9,7 @@
     "prettier:fix": "prettier --write \"./**/*.{js,ts,json}\"",
     "clean": "rm -rf dist",
     "build": "pnpm run clean && tsc",
+    "test": "pnpm run build && node --test ./dist/tests/**/*.js",
     "exec": "node dist/index.js"
   },
   "repository": {
