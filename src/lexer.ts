@@ -3,15 +3,15 @@ import { keywords, Token, TokenKind } from './token.js';
 export class Lexer {
   private source: string;
   private tokens: Token[];
-  private startPosition: number;
-  private currentPosition: number;
+  private startPos: number;
+  private currentPos: number;
   private line: number;
 
   constructor(source: string) {
     this.source = source;
     this.tokens = [];
-    this.startPosition = 0;
-    this.currentPosition = 0;
+    this.startPos = 0;
+    this.currentPos = 0;
     this.line = 1;
   }
 
@@ -20,7 +20,7 @@ export class Lexer {
    */
   readTokens(): Token[] {
     while (!this.isAtEnd()) {
-      this.startPosition = this.currentPosition;
+      this.startPos = this.currentPos;
       this.readToken();
     }
 
@@ -108,7 +108,7 @@ export class Lexer {
    */
   readChar(): string {
     if (this.isAtEnd()) return '\0';
-    return this.source.charAt(this.currentPosition++);
+    return this.source.charAt(this.currentPos++);
   }
 
   /**
@@ -118,10 +118,7 @@ export class Lexer {
    */
   createToken(kind: TokenKind, literal?: any): void {
     if (literal === undefined) literal = null;
-    const text = this.source.substring(
-      this.startPosition,
-      this.currentPosition
-    );
+    const text = this.source.substring(this.startPos, this.currentPos);
     this.tokens.push(new Token(kind, text, this.line));
   }
 
@@ -129,7 +126,7 @@ export class Lexer {
    * Check if we've reached the end of file
    */
   private isAtEnd(): boolean {
-    return this.currentPosition >= this.source.length;
+    return this.currentPos >= this.source.length;
   }
 
   /**
@@ -137,14 +134,14 @@ export class Lexer {
    */
   private peekNextChar(): string {
     if (this.isAtEnd()) return '\0';
-    return this.source.charAt(this.currentPosition);
+    return this.source.charAt(this.currentPos);
   }
 
   /**
    * Get next character
    */
   private getNextChar(): string {
-    return this.source.charAt(this.currentPosition++);
+    return this.source.charAt(this.currentPos++);
   }
 
   /**
@@ -171,10 +168,7 @@ export class Lexer {
    */
   private readDevanagariDigit(): void {
     while (this.isDevanagariDigit(this.peekNextChar())) this.getNextChar();
-    const literal = this.source.substring(
-      this.startPosition,
-      this.currentPosition
-    );
+    const literal = this.source.substring(this.startPos, this.currentPos);
 
     this.createToken(TokenKind.Number, literal);
   }
@@ -184,10 +178,7 @@ export class Lexer {
    */
   private readDevanagariIdentifier(): void {
     while (this.isDevnagariChar(this.peekNextChar())) this.getNextChar();
-    const literal = this.source.substring(
-      this.startPosition,
-      this.currentPosition
-    );
+    const literal = this.source.substring(this.startPos, this.currentPos);
 
     const keywordKind = keywords[literal];
     if (keywordKind) this.createToken(keywordKind, literal);
@@ -205,8 +196,8 @@ export class Lexer {
 
     this.getNextChar();
     const content = this.source.substring(
-      this.startPosition + 1,
-      this.currentPosition - 1
+      this.startPos + 1,
+      this.currentPos - 1
     );
     this.createToken(TokenKind.String, content);
   }
