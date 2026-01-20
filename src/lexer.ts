@@ -24,6 +24,7 @@ export class Lexer {
       this.readToken();
     }
 
+    this.tokens.push(new Token(TokenKind.Eof, '', this.line));
     return this.tokens;
   }
 
@@ -78,9 +79,6 @@ export class Lexer {
         break;
       case '=':
         this.createToken(TokenKind.Equal);
-        break;
-      case '\0':
-        this.createToken(TokenKind.Eof);
         break;
 
       /* Handle whitespaces */
