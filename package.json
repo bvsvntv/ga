@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "A toy programming language",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
   "scripts": {
     "prettier:check": "prettier --check \"./**/*.{js,ts,json}\"",
     "prettier:fix": "prettier --write \"./**/*.{js,ts,json}\"",
     "clean": "rm -rf dist",
     "build": "pnpm run clean && tsc",
     "test": "pnpm run build && node --test ./dist/tests/**/*.js",
-    "exec": "pnpm run build && node dist/src/index.js"
+    "exec": "pnpm run build && node dist/src/main.js"
   },
   "repository": {
     "type": "git",
