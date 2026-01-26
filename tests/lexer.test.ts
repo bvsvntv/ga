@@ -18,7 +18,8 @@ describe('Lexer', () => {
       new Token(TokenKind.OpenParen, '(', 1),
       new Token(TokenKind.CloseParen, ')', 1),
       new Token(TokenKind.OpenCurly, '{', 1),
-      new Token(TokenKind.CloseCurly, '}', 1)
+      new Token(TokenKind.CloseCurly, '}', 1),
+      new Token(TokenKind.Eof, '', 1)
     ];
 
     assert.equal(actual.length, expected.length);
@@ -38,7 +39,8 @@ describe('Lexer', () => {
       new Token(TokenKind.Slash, '/', 1),
       new Token(TokenKind.Mod, '%', 1),
       new Token(TokenKind.Bang, '!', 1),
-      new Token(TokenKind.Equal, '=', 1)
+      new Token(TokenKind.Equal, '=', 1),
+      new Token(TokenKind.Eof, '', 1)
     ];
 
     assert.equal(actual.length, expected.length);
@@ -76,7 +78,8 @@ describe('Lexer', () => {
       new Token(TokenKind.CloseCurly, '}', 5),
       new Token(TokenKind.Identifier, 'काम', 6),
       new Token(TokenKind.OpenParen, '(', 6),
-      new Token(TokenKind.CloseParen, ')', 6)
+      new Token(TokenKind.CloseParen, ')', 6),
+      new Token(TokenKind.Eof, '', 6)
     ];
 
     assert.equal(actual.length, expected.length);
