@@ -18,8 +18,7 @@
     /* Transpiling */
     "module": "NodeNext",
     "rootDir": ".",
-    "outDir": "./dist",
-    "sourceMap": true
+    "outDir": "./dist"
   },
   "include": ["src/**/*.ts", "tests/**/*.test.ts"],
   "exclude": ["node_modules", "dist"]
