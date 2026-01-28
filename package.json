@@ -13,7 +13,7 @@
     "clean": "rm -rf dist",
     "build": "pnpm run clean && tsc",
     "test": "pnpm run build && node --test ./dist/tests/**/*.js",
-    "exec": "pnpm run build && node dist/src/main.js"
+    "ga": "pnpm run build && node dist/src/main.js"
   },
   "repository": {
     "type": "git",
