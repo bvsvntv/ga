@@ -33,7 +33,17 @@
   "homepage": "https://github.com/x-incubator/ga#readme",
   "engines": {
     "node": ">=20.x.x",
-    "npm": ">=10.x.x"
+    "pnpm": ">=10.x.x"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "onFail": "error"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "onFail": "error"
+    }
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
