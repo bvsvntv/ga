@@ -4,6 +4,10 @@ import { Parser } from './parser.js';
 import { Interpreter } from './interpreter.js';
 
 function getFileNameFromArgs(args: string[]): string | null {
+  if (args.length <= 0) {
+    console.log('> No input files.');
+  }
+
   if (args.length > 1) {
     console.log('> Too many arguments.');
   }
