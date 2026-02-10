@@ -1,12 +1,16 @@
-import type {
-  Expr,
-  ExprVisitor,
-  LiteralExpr,
-  PrintStmt,
-  Stmt,
-  StmtVisitor,
-  VariableExpr,
-  VarStmt
+import {
+  FunctionStmt,
+  type BlockStmt,
+  type CallExpr,
+  type ExpressionStmt,
+  type Expr,
+  type ExprVisitor,
+  type LiteralExpr,
+  type PrintStmt,
+  type Stmt,
+  type StmtVisitor,
+  type VariableExpr,
+  type VarStmt
 } from './ast.js';
 
 export class Interpreter implements ExprVisitor<any>, StmtVisitor<void> {
@@ -36,6 +40,20 @@ export class Interpreter implements ExprVisitor<any>, StmtVisitor<void> {
     this.environment.set(stmt.name.lexeme, value);
   }
 
+  visitFunctionStmt(stmt: FunctionStmt): void {
+    this.environment.set(stmt.name.lexeme, stmt);
+  }
+
+  visitBlockStmt(stmt: BlockStmt): void {
+    for (const statement of stmt.statements) {
+      this.execute(statement);
+    }
+  }
+
+  visitExpressionStmt(stmt: ExpressionStmt): void {
+    this.evaluate(stmt.expression);
+  }
+
   visitLiteralExpr(expr: LiteralExpr): any {
     if (typeof expr.value === 'string' && expr.value.startsWith('"')) {
       return expr.value.slice(1, -1);
@@ -50,6 +68,42 @@ export class Interpreter implements ExprVisitor<any>, StmtVisitor<void> {
       throw new Error(`Undefined variable '${expr.name.lexeme}'`);
     }
     return value;
+  }
+
+  visitCallExpr(expr: CallExpr): any {
+    const func = this.environment.get(expr.callee.name.lexeme);
+    if (func === undefined) {
+      throw new Error(`Undefined function '${expr.callee.name.lexeme}'`);
+    }
+    if (!(func instanceof FunctionStmt)) {
+      throw new Error(`'${expr.callee.name.lexeme}' is not a function`);
+    }
+
+    // Create new environment for function scope
+    const prevEnvironment = this.environment;
+    this.environment = new Map(this.environment);
+
+    // Bind arguments to parameters
+    if (expr.args.length !== func.params.length) {
+      throw new Error(
+        `Expected ${func.params.length} arguments but got ${expr.args.length}`
+      );
+    }
+
+    for (let i = 0; i < func.params.length; i++) {
+      const value = this.evaluate(expr.args[i]!);
+      this.environment.set(func.params[i]!.lexeme, value);
+    }
+
+    // Execute function body
+    for (const stmt of func.body) {
+      this.execute(stmt);
+    }
+
+    // Restore previous environment
+    this.environment = prevEnvironment;
+
+    return null;
   }
 
   /*

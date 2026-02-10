@@ -1,4 +1,4 @@
-import { LiteralExpr, PrintStmt, VarStmt, VariableExpr } from './ast.js';
+import { BlockStmt, CallExpr, ExpressionStmt, FunctionStmt, LiteralExpr, PrintStmt, VarStmt, VariableExpr } from './ast.js';
 import { TokenKind } from './token.js';
 export class Parser {
     tokens;
@@ -21,7 +21,14 @@ export class Parser {
         if (this.match(TokenKind.Let)) {
             return this.parseVarStmt();
         }
-        throw this.error(this.peek(), 'Expression expected.');
+        if (this.match(TokenKind.Function)) {
+            return this.parseFunctionStmt();
+        }
+        return this.parseExpressionStmt();
+    }
+    parseExpressionStmt() {
+        const expr = this.parseExpression();
+        return new ExpressionStmt(expr);
     }
     parsePrintStmt() {
         this.consume(TokenKind.OpenParen, "Expect '(' after 'छाप'");
@@ -37,8 +44,49 @@ export class Parser {
         }
         return new VarStmt(name, initializer);
     }
+    parseFunctionStmt() {
+        const name = this.consume(TokenKind.Identifier, "Expect function name after 'कार्य'");
+        this.consume(TokenKind.OpenParen, "Expect '(' after function name");
+        const params = [];
+        if (!this.check(TokenKind.CloseParen)) {
+            do {
+                params.push(this.consume(TokenKind.Identifier, 'Expect parameter name'));
+            } while (this.match(TokenKind.Comma));
+        }
+        this.consume(TokenKind.CloseParen, "Expect ')' after parameters");
+        this.consume(TokenKind.OpenCurly, "Expect '{' before function body");
+        const body = this.parseBlock();
+        return new FunctionStmt(name, params, body);
+    }
+    parseBlock() {
+        const statements = [];
+        while (!this.check(TokenKind.CloseCurly) && !this.isAtEnd()) {
+            statements.push(this.parseStmt());
+        }
+        this.consume(TokenKind.CloseCurly, "Expect '}' after block");
+        return statements;
+    }
     parseExpression() {
-        return this.parsePrimary();
+        return this.parseCall();
+    }
+    parseCall() {
+        let expr = this.parsePrimary();
+        while (this.match(TokenKind.OpenParen)) {
+            const args = [];
+            if (!this.check(TokenKind.CloseParen)) {
+                do {
+                    args.push(this.parseExpression());
+                } while (this.match(TokenKind.Comma));
+            }
+            this.consume(TokenKind.CloseParen, "Expect ')' after arguments");
+            if (expr instanceof VariableExpr) {
+                expr = new CallExpr(expr, args);
+            }
+            else {
+                throw this.error(this.previous(), 'Can only call functions');
+            }
+        }
+        return expr;
     }
     parsePrimary() {
         if (this.match(TokenKind.String, TokenKind.Number)) {

@@ -7,6 +7,7 @@ export interface Expr {
 export interface ExprVisitor<T> {
   visitVariableExpr(expr: VariableExpr): T;
   visitLiteralExpr(expr: LiteralExpr): T;
+  visitCallExpr(expr: CallExpr): T;
 }
 
 export interface Stmt {
@@ -16,6 +17,9 @@ export interface Stmt {
 export interface StmtVisitor<T> {
   visitPrintStmt(stmt: PrintStmt): T;
   visitVarStmt(stmt: VarStmt): T;
+  visitFunctionStmt(stmt: FunctionStmt): T;
+  visitBlockStmt(stmt: BlockStmt): T;
+  visitExpressionStmt(stmt: ExpressionStmt): T;
 }
 
 export class VariableExpr implements Expr {
@@ -42,6 +46,20 @@ export class LiteralExpr implements Expr {
   }
 }
 
+export class CallExpr implements Expr {
+  callee: VariableExpr;
+  args: Expr[];
+
+  constructor(callee: VariableExpr, args: Expr[]) {
+    this.callee = callee;
+    this.args = args;
+  }
+
+  accept<T>(visitor: ExprVisitor<T>): T {
+    return visitor.visitCallExpr(this);
+  }
+}
+
 export class PrintStmt implements Stmt {
   expression: Expr;
 
@@ -65,5 +83,45 @@ export class VarStmt implements Stmt {
 
   accept<T>(visitor: StmtVisitor<T>): T {
     return visitor.visitVarStmt(this);
+  }
+}
+
+export class FunctionStmt implements Stmt {
+  name: Token;
+  params: Token[];
+  body: Stmt[];
+
+  constructor(name: Token, params: Token[], body: Stmt[]) {
+    this.name = name;
+    this.params = params;
+    this.body = body;
+  }
+
+  accept<T>(visitor: StmtVisitor<T>): T {
+    return visitor.visitFunctionStmt(this);
+  }
+}
+
+export class BlockStmt implements Stmt {
+  statements: Stmt[];
+
+  constructor(statements: Stmt[]) {
+    this.statements = statements;
+  }
+
+  accept<T>(visitor: StmtVisitor<T>): T {
+    return visitor.visitBlockStmt(this);
+  }
+}
+
+export class ExpressionStmt implements Stmt {
+  expression: Expr;
+
+  constructor(expression: Expr) {
+    this.expression = expression;
+  }
+
+  accept<T>(visitor: StmtVisitor<T>): T {
+    return visitor.visitExpressionStmt(this);
   }
 }

@@ -16,6 +16,17 @@ export class LiteralExpr {
         return visitor.visitLiteralExpr(this);
     }
 }
+export class CallExpr {
+    callee;
+    args;
+    constructor(callee, args) {
+        this.callee = callee;
+        this.args = args;
+    }
+    accept(visitor) {
+        return visitor.visitCallExpr(this);
+    }
+}
 export class PrintStmt {
     expression;
     constructor(expression) {
@@ -34,5 +45,36 @@ export class VarStmt {
     }
     accept(visitor) {
         return visitor.visitVarStmt(this);
+    }
+}
+export class FunctionStmt {
+    name;
+    params;
+    body;
+    constructor(name, params, body) {
+        this.name = name;
+        this.params = params;
+        this.body = body;
+    }
+    accept(visitor) {
+        return visitor.visitFunctionStmt(this);
+    }
+}
+export class BlockStmt {
+    statements;
+    constructor(statements) {
+        this.statements = statements;
+    }
+    accept(visitor) {
+        return visitor.visitBlockStmt(this);
+    }
+}
+export class ExpressionStmt {
+    expression;
+    constructor(expression) {
+        this.expression = expression;
+    }
+    accept(visitor) {
+        return visitor.visitExpressionStmt(this);
     }
 }

@@ -1,4 +1,8 @@
 import {
+  BlockStmt,
+  CallExpr,
+  ExpressionStmt,
+  FunctionStmt,
   LiteralExpr,
   PrintStmt,
   VarStmt,
@@ -35,7 +39,16 @@ export class Parser {
       return this.parseVarStmt();
     }
 
-    throw this.error(this.peek(), 'Expression expected.');
+    if (this.match(TokenKind.Function)) {
+      return this.parseFunctionStmt();
+    }
+
+    return this.parseExpressionStmt();
+  }
+
+  private parseExpressionStmt(): ExpressionStmt {
+    const expr = this.parseExpression();
+    return new ExpressionStmt(expr);
   }
 
   private parsePrintStmt(): Stmt {
@@ -59,8 +72,65 @@ export class Parser {
     return new VarStmt(name, initializer);
   }
 
+  private parseFunctionStmt(): FunctionStmt {
+    const name = this.consume(
+      TokenKind.Identifier,
+      "Expect function name after 'कार्य'"
+    );
+    this.consume(TokenKind.OpenParen, "Expect '(' after function name");
+
+    const params: Token[] = [];
+    if (!this.check(TokenKind.CloseParen)) {
+      do {
+        params.push(
+          this.consume(TokenKind.Identifier, 'Expect parameter name')
+        );
+      } while (this.match(TokenKind.Comma));
+    }
+
+    this.consume(TokenKind.CloseParen, "Expect ')' after parameters");
+    this.consume(TokenKind.OpenCurly, "Expect '{' before function body");
+
+    const body = this.parseBlock();
+
+    return new FunctionStmt(name, params, body);
+  }
+
+  private parseBlock(): Stmt[] {
+    const statements: Stmt[] = [];
+
+    while (!this.check(TokenKind.CloseCurly) && !this.isAtEnd()) {
+      statements.push(this.parseStmt());
+    }
+
+    this.consume(TokenKind.CloseCurly, "Expect '}' after block");
+    return statements;
+  }
+
   private parseExpression(): Expr {
-    return this.parsePrimary();
+    return this.parseCall();
+  }
+
+  private parseCall(): Expr {
+    let expr = this.parsePrimary();
+
+    while (this.match(TokenKind.OpenParen)) {
+      const args: Expr[] = [];
+      if (!this.check(TokenKind.CloseParen)) {
+        do {
+          args.push(this.parseExpression());
+        } while (this.match(TokenKind.Comma));
+      }
+      this.consume(TokenKind.CloseParen, "Expect ')' after arguments");
+
+      if (expr instanceof VariableExpr) {
+        expr = new CallExpr(expr, args);
+      } else {
+        throw this.error(this.previous(), 'Can only call functions');
+      }
+    }
+
+    return expr;
   }
 
   private parsePrimary(): Expr {
