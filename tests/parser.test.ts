@@ -2,7 +2,13 @@ import test, { describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { Lexer } from '../src/lexer.js';
 import { Parser } from '../src/parser.js';
-import { PrintStmt, VarStmt, LiteralExpr, VariableExpr } from '../src/ast.js';
+import {
+  PrintStmt,
+  VarStmt,
+  FunctionStmt,
+  LiteralExpr,
+  VariableExpr
+} from '../src/ast.js';
 
 describe('Parser', () => {
   test('parse print statement', () => {
@@ -84,5 +90,42 @@ describe('Parser', () => {
     assert.equal(stmts.length, 2);
     assert.ok(stmts[0] instanceof VarStmt);
     assert.ok(stmts[1] instanceof PrintStmt);
+  });
+
+  test('parse function declaration without parameters', () => {
+    const source: string = `कार्य नमस्कार() {
+  छाप("नमस्ते")
+}`;
+    const lexer: Lexer = new Lexer(source.trim());
+    const tokens = lexer.readTokens();
+    const parser: Parser = new Parser(tokens);
+    const stmts = parser.parse();
+
+    assert.equal(stmts.length, 1);
+    assert.ok(stmts[0] instanceof FunctionStmt);
+    const funcStmt = stmts[0] as FunctionStmt;
+    assert.equal(funcStmt.name.lexeme, 'नमस्कार');
+    assert.equal(funcStmt.params.length, 0);
+    assert.equal(funcStmt.body.length, 1);
+  });
+
+  test('parse function declaration with parameters', () => {
+    const source: string = `कार्य जोड(अ, ब) {
+  छाप(अ)
+  छाप(ब)
+}`;
+    const lexer: Lexer = new Lexer(source.trim());
+    const tokens = lexer.readTokens();
+    const parser: Parser = new Parser(tokens);
+    const stmts = parser.parse();
+
+    assert.equal(stmts.length, 1);
+    assert.ok(stmts[0] instanceof FunctionStmt);
+    const funcStmt = stmts[0] as FunctionStmt;
+    assert.equal(funcStmt.name.lexeme, 'जोड');
+    assert.equal(funcStmt.params.length, 2);
+    assert.equal(funcStmt.params[0]!.lexeme, 'अ');
+    assert.equal(funcStmt.params[1]!.lexeme, 'ब');
+    assert.equal(funcStmt.body.length, 2);
   });
 });
