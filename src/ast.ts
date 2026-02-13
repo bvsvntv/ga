@@ -8,6 +8,7 @@ export interface ExprVisitor<T> {
   visitVariableExpr(expr: VariableExpr): T;
   visitLiteralExpr(expr: LiteralExpr): T;
   visitCallExpr(expr: CallExpr): T;
+  visitBinaryExpr(expr: BinaryExpr): T;
 }
 
 export interface Stmt {
@@ -57,6 +58,22 @@ export class CallExpr implements Expr {
 
   accept<T>(visitor: ExprVisitor<T>): T {
     return visitor.visitCallExpr(this);
+  }
+}
+
+export class BinaryExpr implements Expr {
+  left: Expr;
+  operator: Token;
+  right: Expr;
+
+  constructor(left: Expr, operator: Token, right: Expr) {
+    this.left = left;
+    this.operator = operator;
+    this.right = right;
+  }
+
+  accept<T>(visitor: ExprVisitor<T>): T {
+    return visitor.visitBinaryExpr(this);
   }
 }
 

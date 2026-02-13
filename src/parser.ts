@@ -1,4 +1,5 @@
 import {
+  BinaryExpr,
   CallExpr,
   ExpressionStmt,
   FunctionStmt,
@@ -111,7 +112,31 @@ export class Parser {
   }
 
   private parseExpression(): Expr {
-    return this.parseCall();
+    return this.parseAddition();
+  }
+
+  private parseAddition(): Expr {
+    let expr = this.parseMultiplication();
+
+    while (this.match(TokenKind.Plus, TokenKind.Minus)) {
+      const operator = this.previous();
+      const right = this.parseMultiplication();
+      expr = new BinaryExpr(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  private parseMultiplication(): Expr {
+    let expr = this.parseCall();
+
+    while (this.match(TokenKind.Star, TokenKind.Slash, TokenKind.Mod)) {
+      const operator = this.previous();
+      const right = this.parseCall();
+      expr = new BinaryExpr(expr, operator, right);
+    }
+
+    return expr;
   }
 
   private parseCall(): Expr {
@@ -143,6 +168,12 @@ export class Parser {
 
     if (this.match(TokenKind.Identifier)) {
       return new VariableExpr(this.previous());
+    }
+
+    if (this.match(TokenKind.OpenParen)) {
+      const expr = this.parseExpression();
+      this.consume(TokenKind.CloseParen, "Expect ')' after expression");
+      return expr;
     }
 
     throw this.error(this.peek(), 'Expression expected.');

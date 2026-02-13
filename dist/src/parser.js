@@ -1,4 +1,4 @@
-import { CallExpr, ExpressionStmt, FunctionStmt, LiteralExpr, PrintStmt, VarStmt, VariableExpr } from './ast.js';
+import { BinaryExpr, CallExpr, ExpressionStmt, FunctionStmt, LiteralExpr, PrintStmt, VarStmt, VariableExpr } from './ast.js';
 import { TokenKind } from './token.js';
 export class Parser {
     tokens;
@@ -71,7 +71,25 @@ export class Parser {
         return statements;
     }
     parseExpression() {
-        return this.parseCall();
+        return this.parseAddition();
+    }
+    parseAddition() {
+        let expr = this.parseMultiplication();
+        while (this.match(TokenKind.Plus, TokenKind.Minus)) {
+            const operator = this.previous();
+            const right = this.parseMultiplication();
+            expr = new BinaryExpr(expr, operator, right);
+        }
+        return expr;
+    }
+    parseMultiplication() {
+        let expr = this.parseCall();
+        while (this.match(TokenKind.Star, TokenKind.Slash, TokenKind.Mod)) {
+            const operator = this.previous();
+            const right = this.parseCall();
+            expr = new BinaryExpr(expr, operator, right);
+        }
+        return expr;
     }
     parseCall() {
         let expr = this.parsePrimary();
@@ -98,6 +116,11 @@ export class Parser {
         }
         if (this.match(TokenKind.Identifier)) {
             return new VariableExpr(this.previous());
+        }
+        if (this.match(TokenKind.OpenParen)) {
+            const expr = this.parseExpression();
+            this.consume(TokenKind.CloseParen, "Expect ')' after expression");
+            return expr;
         }
         throw this.error(this.peek(), 'Expression expected.');
     }

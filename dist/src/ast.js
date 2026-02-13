@@ -27,6 +27,19 @@ export class CallExpr {
         return visitor.visitCallExpr(this);
     }
 }
+export class BinaryExpr {
+    left;
+    operator;
+    right;
+    constructor(left, operator, right) {
+        this.left = left;
+        this.operator = operator;
+        this.right = right;
+    }
+    accept(visitor) {
+        return visitor.visitBinaryExpr(this);
+    }
+}
 export class PrintStmt {
     expression;
     constructor(expression) {

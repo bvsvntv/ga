@@ -1,4 +1,5 @@
 import {
+  BinaryExpr,
   FunctionStmt,
   type BlockStmt,
   type CallExpr,
@@ -12,6 +13,7 @@ import {
   type VariableExpr,
   type VarStmt
 } from './ast.js';
+import { TokenKind } from './token.js';
 
 export class Interpreter implements ExprVisitor<any>, StmtVisitor<void> {
   private environment: Map<string, any> = new Map();
@@ -31,7 +33,28 @@ export class Interpreter implements ExprVisitor<any>, StmtVisitor<void> {
    */
   visitPrintStmt(stmt: PrintStmt): void {
     const value = this.evaluate(stmt.expression);
-    console.log(value);
+    console.log(this.toDevanagariString(value));
+  }
+
+  private toDevanagariString(value: any): string {
+    if (typeof value === 'number') {
+      return this.numberToDevanagari(value);
+    }
+    return String(value);
+  }
+
+  private numberToDevanagari(num: number): string {
+    const devanagariZero = 0x0966;
+    return num
+      .toString()
+      .split('')
+      .map((char) => {
+        if (char >= '0' && char <= '9') {
+          return String.fromCharCode(devanagariZero + parseInt(char));
+        }
+        return char;
+      })
+      .join('');
   }
 
   visitVarStmt(stmt: VarStmt): void {
@@ -59,7 +82,33 @@ export class Interpreter implements ExprVisitor<any>, StmtVisitor<void> {
       return expr.value.slice(1, -1);
     }
 
+    // Check if it's a Devanagari number and convert it
+    if (typeof expr.value === 'string' && this.isDevanagariNumber(expr.value)) {
+      return this.devanagariToNumber(expr.value);
+    }
+
     return expr.value;
+  }
+
+  private isDevanagariNumber(value: string): boolean {
+    if (value.length === 0) return false;
+    for (const char of value) {
+      const code = char.charCodeAt(0);
+      if (code < 0x0966 || code > 0x096f) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private devanagariToNumber(value: string): number {
+    const devanagariZero = 0x0966;
+    let num = 0;
+    for (const char of value) {
+      const code = char.charCodeAt(0);
+      num = num * 10 + (code - devanagariZero);
+    }
+    return num;
   }
 
   visitVariableExpr(expr: VariableExpr): any {
@@ -104,6 +153,68 @@ export class Interpreter implements ExprVisitor<any>, StmtVisitor<void> {
     this.environment = prevEnvironment;
 
     return null;
+  }
+
+  visitBinaryExpr(expr: BinaryExpr): any {
+    const left = this.evaluate(expr.left);
+    const right = this.evaluate(expr.right);
+
+    // Convert Devanagari digits to regular numbers for arithmetic
+    const leftNum = this.toNumber(left);
+    const rightNum = this.toNumber(right);
+
+    switch (expr.operator.kind) {
+      case TokenKind.Plus:
+        // Handle string concatenation or numeric addition
+        if (typeof left === 'string' && typeof right === 'string') {
+          return left + right;
+        }
+        return leftNum + rightNum;
+      case TokenKind.Minus:
+        return leftNum - rightNum;
+      case TokenKind.Star:
+        return leftNum * rightNum;
+      case TokenKind.Slash:
+        if (rightNum === 0) {
+          throw new Error('Division by zero');
+        }
+        return leftNum / rightNum;
+      case TokenKind.Mod:
+        if (rightNum === 0) {
+          throw new Error('Modulo by zero');
+        }
+        return leftNum % rightNum;
+      default:
+        throw new Error(`Unknown operator: ${expr.operator.kind}`);
+    }
+  }
+
+  private toNumber(value: any): number {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+      // Check if it's a Devanagari number
+      const devanagariZero = '\u{0966}'.charCodeAt(0); // ०
+      let isDevanagari = true;
+      let num = 0;
+      for (const char of value) {
+        const code = char.charCodeAt(0);
+        if (code >= devanagariZero && code <= devanagariZero + 9) {
+          num = num * 10 + (code - devanagariZero);
+        } else if (char >= '0' && char <= '9') {
+          isDevanagari = false;
+        } else {
+          throw new Error(`Cannot convert '${value}' to number`);
+        }
+      }
+      if (isDevanagari && value.length > 0) return num;
+      // Otherwise try regular parsing
+      const parsed = parseFloat(value);
+      if (isNaN(parsed)) {
+        throw new Error(`Cannot convert '${value}' to number`);
+      }
+      return parsed;
+    }
+    throw new Error(`Cannot convert '${value}' to number`);
   }
 
   /*
