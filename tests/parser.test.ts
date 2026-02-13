@@ -7,7 +7,8 @@ import {
   VarStmt,
   FunctionStmt,
   LiteralExpr,
-  VariableExpr
+  VariableExpr,
+  BinaryExpr
 } from '../src/ast.js';
 
 describe('Parser', () => {
@@ -127,5 +128,92 @@ describe('Parser', () => {
     assert.equal(funcStmt.params[0]!.lexeme, 'अ');
     assert.equal(funcStmt.params[1]!.lexeme, 'ब');
     assert.equal(funcStmt.body.length, 2);
+  });
+
+  test('parse binary expression with addition', () => {
+    const source: string = `मानौ क = ५ + ३`;
+    const lexer: Lexer = new Lexer(source.trim());
+    const tokens = lexer.readTokens();
+    const parser: Parser = new Parser(tokens);
+    const stmts = parser.parse();
+
+    assert.equal(stmts.length, 1);
+    assert.ok(stmts[0] instanceof VarStmt);
+    const varStmt = stmts[0] as VarStmt;
+    assert.ok(varStmt.initializer instanceof BinaryExpr);
+    const binaryExpr = varStmt.initializer as BinaryExpr;
+    assert.ok(binaryExpr.left instanceof LiteralExpr);
+    assert.ok(binaryExpr.right instanceof LiteralExpr);
+  });
+
+  test('parse binary expression with operator precedence', () => {
+    const source: string = `मानौ क = २ + ३ * ४`;
+    const lexer: Lexer = new Lexer(source.trim());
+    const tokens = lexer.readTokens();
+    const parser: Parser = new Parser(tokens);
+    const stmts = parser.parse();
+
+    assert.equal(stmts.length, 1);
+    assert.ok(stmts[0] instanceof VarStmt);
+    const varStmt = stmts[0] as VarStmt;
+    assert.ok(varStmt.initializer instanceof BinaryExpr);
+    const binaryExpr = varStmt.initializer as BinaryExpr;
+    assert.ok(binaryExpr.left instanceof LiteralExpr);
+    assert.ok(binaryExpr.right instanceof BinaryExpr);
+  });
+
+  test('parse binary expression with parentheses', () => {
+    const source: string = `मानौ क = (२ + ३) * ४`;
+    const lexer: Lexer = new Lexer(source.trim());
+    const tokens = lexer.readTokens();
+    const parser: Parser = new Parser(tokens);
+    const stmts = parser.parse();
+
+    assert.equal(stmts.length, 1);
+    assert.ok(stmts[0] instanceof VarStmt);
+    const varStmt = stmts[0] as VarStmt;
+    assert.ok(varStmt.initializer instanceof BinaryExpr);
+    const binaryExpr = varStmt.initializer as BinaryExpr;
+    assert.ok(binaryExpr.left instanceof BinaryExpr);
+    assert.ok(binaryExpr.right instanceof LiteralExpr);
+  });
+
+  test('parse binary expression with subtraction', () => {
+    const source: string = `मानौ क = १० - ५`;
+    const lexer: Lexer = new Lexer(source.trim());
+    const tokens = lexer.readTokens();
+    const parser: Parser = new Parser(tokens);
+    const stmts = parser.parse();
+
+    assert.equal(stmts.length, 1);
+    assert.ok(stmts[0] instanceof VarStmt);
+    const varStmt = stmts[0] as VarStmt;
+    assert.ok(varStmt.initializer instanceof BinaryExpr);
+  });
+
+  test('parse binary expression with division', () => {
+    const source: string = `मानौ क = १५ / ३`;
+    const lexer: Lexer = new Lexer(source.trim());
+    const tokens = lexer.readTokens();
+    const parser: Parser = new Parser(tokens);
+    const stmts = parser.parse();
+
+    assert.equal(stmts.length, 1);
+    assert.ok(stmts[0] instanceof VarStmt);
+    const varStmt = stmts[0] as VarStmt;
+    assert.ok(varStmt.initializer instanceof BinaryExpr);
+  });
+
+  test('parse binary expression with modulo', () => {
+    const source: string = `मानौ क = १७ % ५`;
+    const lexer: Lexer = new Lexer(source.trim());
+    const tokens = lexer.readTokens();
+    const parser: Parser = new Parser(tokens);
+    const stmts = parser.parse();
+
+    assert.equal(stmts.length, 1);
+    assert.ok(stmts[0] instanceof VarStmt);
+    const varStmt = stmts[0] as VarStmt;
+    assert.ok(varStmt.initializer instanceof BinaryExpr);
   });
 });
