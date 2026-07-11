@@ -19,7 +19,8 @@
     "build:all": "pnpm run build && pnpm run build:browser",
     "build:tests": "tsc -p tsconfig.test.json",
     "test": "pnpm run build:all && pnpm run build:tests && node --test ./dist/tests/**/*.js",
-    "ga": "pnpm run build && node dist/src/main.js"
+    "ga": "pnpm run build && node dist/src/main.js",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -58,6 +59,7 @@
   "devDependencies": {
     "@types/node": "^25.0.3",
     "esbuild": "^0.27.3",
+    "husky": "^9.1.7",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3"
   }
