@@ -10,10 +10,7 @@ class ReturnValue extends Error {
 export class Interpreter {
     environment = new Map();
     outputs = [];
-    /**
-     * CLI entry
-     *
-     */
+    // CLI entry - executes and prints result in console
     interpret(statements) {
         this.outputs = [];
         this.run(statements);
@@ -21,15 +18,13 @@ export class Interpreter {
             console.log(line);
         }
     }
-    // Browser entry
+    // Browser entry - returns result as string
     interpretForBrowser(statements) {
         this.outputs = [];
         this.run(statements);
         return this.outputs.join('\n');
     }
-    /*
-     * Process print statement
-     */
+    // Process print statement
     visitPrintStmt(stmt) {
         const value = this.evaluate(stmt.expression);
         const output = this.toDevanagariString(value);
